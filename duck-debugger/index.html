@@ -136,11 +136,16 @@
 
         /* Code blocks in messages */
         [data-bs-theme="light"] .ddbChat pre {
-            background-color: #e0e0e0;
+            background-color: #ebebeb;
             padding: 10px;
             border-radius: 4px;
             font-size: 0.85em;
             overflow-x: auto;
+        }
+
+        .ddbChat pre code.hljs {
+            background: transparent;
+            padding: 0;
         }
 
         #compare-container {
@@ -199,9 +204,10 @@
     <div class="page-header">
         <h1>Getting the Most from the Duck Debugger</h1>
         <p>
-            Both conversations involve the same student, the same code, and the same bug.
-            The difference is how the student communicates with the duck &mdash;
-            notice how more effort and detail leads to a much faster resolution.
+            The <a href="https://cs50.ai/" target="_blank">CS50 AI Duck</a> is trained to work like a tutor.
+            When you ask for help, it will ask you questions to see what you understand first. If you make an effort
+            to answer the question and give it more information, it can see what 
+            you're missing and give you more helpful guidance.
         </p>
     </div>
 
@@ -217,11 +223,11 @@
         <!-- ── Row 1: Column headers ── -->
         <div class="column-label poor-effort col-left col-top">
             Poor-Effort Conversation
-            <div class="sublabel">Vague descriptions, one-word replies, no explanation of symptoms</div>
+            <div class="sublabel">Student gives incomplete responses and poor explanations</div>
         </div>
         <div class="column-label good-effort col-right col-top">
             Good-Effort Conversation
-            <div class="sublabel">Describes the specific symptom and explains their own logic</div>
+            <div class="sublabel">Student gives thoughtful explanations and shows their understanding </div>
         </div>
 
         <!-- ── Row 2: ddb intro (identical) ── -->
@@ -313,7 +319,7 @@ print(largval)</code></pre>
         <div class="ddbChat ddbChat-User col-right">
             <span class="ddbChatBorder ddbChatBorder-User"></span>
             <span class="ddbAuthorName"><b>you</b></span>
-            <span class="ddbChatMessage"><p>the output is always just the last row in my data</p></span>
+            <span class="ddbChatMessage"><p>No error message. The output is always just the last row in my data</p></span>
         </div>
 
         <!-- ── Row 6: ddb responds ── -->
@@ -408,7 +414,7 @@ print(largval)</code></pre>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Highlight.js for syntax highlighting -->
-    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
     <script>hljs.highlightAll();</script>
 
     <!-- Code version toggle -->
@@ -437,7 +443,7 @@ print(largval)</code></pre>
                 var hljsCss = document.getElementById('highlightjs-css');
                 if (hljsCss) {
                     hljsCss.setAttribute('href', dark
-                        ? 'https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css'
+                        ? 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css'
                         : 'github.min.css');
                 }
             }
