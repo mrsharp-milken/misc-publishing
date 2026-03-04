@@ -419,19 +419,32 @@ print(largval)</code></pre>
 
     <!-- Code version toggle -->
     <script>
+        function applyVersion(version) {
+            document.querySelectorAll('.toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+            var activeBtn = document.querySelector('.toggle-btn[data-version="' + version + '"]');
+            if (activeBtn) activeBtn.classList.add('active');
+            document.querySelectorAll('.code-simplified').forEach(function(el) {
+                el.style.display = version === 'simplified' ? '' : 'none';
+            });
+            document.querySelectorAll('.code-original').forEach(function(el) {
+                el.style.display = version === 'original' ? '' : 'none';
+            });
+            var url = new URL(window.location);
+            url.searchParams.set('code', version);
+            history.replaceState(null, '', url);
+        }
+
         document.querySelectorAll('.toggle-btn').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                var version = this.dataset.version;
-                document.querySelectorAll('.toggle-btn').forEach(function(b) { b.classList.remove('active'); });
-                this.classList.add('active');
-                document.querySelectorAll('.code-simplified').forEach(function(el) {
-                    el.style.display = version === 'simplified' ? '' : 'none';
-                });
-                document.querySelectorAll('.code-original').forEach(function(el) {
-                    el.style.display = version === 'original' ? '' : 'none';
-                });
+                applyVersion(this.dataset.version);
             });
         });
+
+        // Initialize from URL parameter on load
+        var initialVersion = new URL(window.location).searchParams.get('code');
+        if (initialVersion === 'original' || initialVersion === 'simplified') {
+            applyVersion(initialVersion);
+        }
     </script>
 
     <!-- Respect system dark/light preference -->
