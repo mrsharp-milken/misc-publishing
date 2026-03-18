@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IB CS IA: Brainstorming and Proposal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #faf8f3;
+    --cream: #f0ece0;
+    --accent: #c0392b;
+    --accent2: #2980b9;
+    --accent3: #27ae60;
+    --amber: #e67e22;
+    --muted: #6b6560;
+    --rule: #d4cfc4;
+    --green-bg: #eafaf1;
+    --red-bg: #fdf2f0;
+    --blue-bg: #eaf4fb;
+    --amber-bg: #fef9f0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 56px 48px 80px;
+  }
+
+  /* SAVE BAR */
+  .save-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--ink);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+  .save-bar .save-status { opacity: 0.6; font-size: 11px; }
+  .save-bar .bar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1.5px solid white;
+    background: transparent;
+    color: white;
+    padding: 5px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn:hover { background: white; color: var(--ink); }
+  .btn.primary { background: white; color: var(--ink); border-color: white; }
+  .btn.primary:hover { background: #e0e0e0; }
+  .btn.danger { border-color: #e88; color: #e88; }
+  .btn.danger:hover { background: #e88; color: white; }
+
+  /* MASTHEAD */
+  .masthead {
+    border-bottom: 3px solid var(--ink);
+    padding-bottom: 24px;
+    margin-bottom: 36px;
+    margin-top: 36px;
+  }
+  .masthead-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .masthead h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 40px;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  .masthead h1 em { font-style: italic; color: var(--accent); }
+  .masthead-sub { margin-top: 10px; color: var(--muted); font-size: 14px; font-weight: 300; }
+
+  /* SECTION HEADINGS */
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--ink);
+    margin-top: 44px;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1.5px solid var(--rule);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .num {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2px 7px;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  p { margin-bottom: 12px; }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: var(--red-bg);
+    padding: 14px 18px;
+    border-radius: 0 6px 6px 0;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+  .callout.green  { border-color: var(--accent3); background: var(--green-bg); }
+  .callout.blue   { border-color: var(--accent2); background: var(--blue-bg); }
+  .callout.amber  { border-color: var(--amber);   background: var(--amber-bg); }
+  .callout strong {
+    display: block;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    opacity: 0.65;
+  }
+
+  /* THREE PILLARS */
+  .pillars { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin: 24px 0; }
+  .pillar {
+    border: 1.5px solid var(--rule);
+    border-radius: 8px;
+    padding: 18px 16px;
+    background: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .pillar::before {
+    content: '';
+    display: block;
+    height: 4px;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    border-radius: 8px 8px 0 0;
+  }
+  .pillar:nth-child(1)::before { background: var(--accent2); }
+  .pillar:nth-child(2)::before { background: var(--accent); }
+  .pillar:nth-child(3)::before { background: var(--accent3); }
+  .pillar-icon { font-size: 22px; margin-bottom: 8px; }
+  .pillar-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+  .pillar-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist .box {
+    width: 17px; height: 17px;
+    border: 1.5px solid var(--ink);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ALGO GRID */
+  .algo-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin: 16px 0; }
+  .algo-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11.5px;
+    background: var(--cream);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 6px 10px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .algo-tag span { display: block; font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* IDEA EXAMPLE CARDS */
+  .idea-card {
+    border: 1.5px solid var(--rule);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin: 16px 0;
+    background: white;
+  }
+  .idea-card-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .idea-card-title { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 10px; color: var(--ink); }
+  .idea-card-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .pill { font-size: 11px; font-family: 'DM Mono', monospace; padding: 3px 9px; border-radius: 20px; border: 1px solid; }
+  .pill.data { color: var(--accent2); border-color: var(--accent2); background: var(--blue-bg); }
+  .pill.algo { color: var(--accent);  border-color: var(--accent);  background: var(--red-bg); }
+  .pill.real { color: var(--accent3); border-color: var(--accent3); background: var(--green-bg); }
+  .idea-card p { font-size: 13.5px; color: var(--muted); margin-bottom: 0; }
+
+  /* AVOID LIST */
+  .avoid-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .avoid-tag {
+    font-size: 12px; background: var(--red-bg); border: 1px solid #e5b4af;
+    border-radius: 4px; padding: 4px 10px; color: #922;
+    font-family: 'DM Mono', monospace; text-decoration: line-through; text-decoration-color: #922;
+  }
+
+  /* FORM FIELDS */
+  .form-section { margin: 12px 0; }
+  .form-label {
+    font-size: 12px; font-family: 'DM Mono', monospace; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; display: block;
+  }
+  .form-input {
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+    background: white; border: none; border-bottom: 1.5px solid var(--ink);
+    width: 100%; padding: 4px 2px; outline: none; margin-bottom: 10px; border-radius: 0;
+  }
+  .form-input:focus { border-bottom-color: var(--accent2); background: #f0f7ff; }
+
+  .form-textarea {
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+    background: white; border: 1.5px solid var(--ink); border-radius: 4px;
+    width: 100%; padding: 8px 10px; outline: none; resize: vertical; margin-bottom: 14px; line-height: 1.6;
+  }
+  .form-textarea:focus { border-color: var(--accent2); background: #f0f7ff; }
+  .form-textarea.sm { min-height: 60px; }
+  .form-textarea.md { min-height: 90px; }
+  .form-textarea.lg { min-height: 120px; }
+
+  /* SCORE SELECTOR */
+  .score-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-label { font-size: 13px; min-width: 240px; }
+  .score-boxes { display: flex; gap: 4px; }
+  .score-box {
+    width: 32px; height: 32px; border: 1.5px solid var(--ink); border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-family: 'DM Mono', monospace; color: var(--muted);
+    cursor: pointer; user-select: none; transition: background 0.1s, color 0.1s;
+  }
+  .score-box:hover { background: var(--cream); }
+  .score-box.selected { background: var(--ink); color: white; border-color: var(--ink); }
+
+  /* IDEA FORM BLOCKS */
+  .idea-block {
+    border: 1.5px solid var(--rule); border-radius: 10px;
+    padding: 22px 24px; margin: 20px 0; background: white;
+  }
+  .idea-block-title {
+    font-family: 'DM Serif Display', serif; font-size: 18px;
+    margin-bottom: 16px; color: var(--ink);
+    border-bottom: 1px solid var(--rule); padding-bottom: 10px;
+  }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 60px; padding-top: 20px; border-top: 1.5px solid var(--rule);
+    font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer a { color: var(--accent2); text-decoration: none; }
+
+  /* PRINT */
+  @media print {
+    .save-bar { display: none !important; }
+    body { background: white; font-size: 13px; }
+    .page { padding: 20px 28px; margin-top: 0; }
+    .pillars { grid-template-columns: repeat(3,1fr); }
+    .algo-grid { grid-template-columns: repeat(2,1fr); }
+    .form-input, .form-textarea { border-color: #999 !important; background: white !important; }
+    .score-box.selected { background: #333 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .idea-card, .idea-block { break-inside: avoid; }
+  }
+
+  @media (max-width: 620px) {
+    .page { padding: 28px 20px; }
+    .pillars { grid-template-columns: 1fr; }
+    .algo-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="save-bar">
+  <span>IB CS IA: Brainstorming and Proposal</span>
+  <div class="bar-actions">
+    <span class="save-status" id="saveStatus">Your answers are saved automatically in this browser.</span>
+    <button class="btn danger" onclick="clearAll()">Clear all</button>
+    <button class="btn primary" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="masthead">
+    <div class="masthead-tag">IB Computer Science · Internal Assessment</div>
+    <h1>Brainstorming &amp; <em>Project Proposal</em></h1>
+    <div class="masthead-sub">A structured guide to finding an idea, testing its suitability, and writing your proposal.</div>
+  </div>
+
+  <h2><span class="num">INTRO</span> What makes a great IA project?</h2>
+  <p>The IB CS Internal Assessment is graded on your ability to <strong>design, build, and evaluate algorithms</strong>. The quality of your project depends on how algorithmically interesting it is, not on how polished it looks.</p>
+
+  <div class="pillars">
+    <div class="pillar">
+      <div class="pillar-icon">📊</div>
+      <div class="pillar-title">Substantial Data</div>
+      <div class="pillar-desc">Your project should work with a meaningful dataset, enough that your algorithm has something interesting to do. Think hundreds or thousands of records, not a handful.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">⚙️</div>
+      <div class="pillar-title">Impressive Algorithm</div>
+      <div class="pillar-desc">Go beyond what the syllabus covers. Higher-achieving IAs demonstrate technical learning beyond the course. Pick something you had to genuinely study and understand.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">🌍</div>
+      <div class="pillar-title">Real-World Use</div>
+      <div class="pillar-desc">Your project should solve a genuine problem. You should be able to describe a specific type of user who would benefit from it.</div>
+    </div>
+  </div>
+
+  <div class="callout amber">
+    <strong>Key principle</strong>
+    Start with the algorithm, not the app. Ask: <em>"What interesting algorithm do I want to learn and demonstrate?"</em> Then design a project around it.
+  </div>
+
+  <h2><span class="num">AVOID</span> Projects to steer clear of</h2>
+  <p>These project types offer little algorithmic complexity. Avoid them unless you can add a genuinely novel algorithmic element.</p>
+  <div class="avoid-list">
+    <span class="avoid-tag">To-do / task app</span>
+    <span class="avoid-tag">Blog platform</span>
+    <span class="avoid-tag">Room / appointment booking</span>
+    <span class="avoid-tag">Inventory / library system</span>
+    <span class="avoid-tag">Basic CRUD web app</span>
+    <span class="avoid-tag">Simple quiz app</span>
+    <span class="avoid-tag">Recipe manager</span>
+    <span class="avoid-tag">Contact book</span>
+  </div>
+  <p style="font-size:13.5px; color:var(--muted);">These are <em>CRUD apps</em> (Create-Read-Update-Delete). They are reasonable software projects, but they do not showcase algorithms, which is what the IA grades you on.</p>
+
+  <h2><span class="num">STEP 1</span> Find your algorithm</h2>
+  <p>Before thinking about what to build, spend time exploring what algorithms exist. Below are some categories and examples. For a full list with project suggestions for each, visit:</p>
+
+  <div class="callout blue">
+    <strong>Algorithm ideas resource</strong>
+    <a href="https://pbaumgarten.com/docs/ib-compsci-2027/ia/ideas.html" style="color:var(--accent2); word-break:break-all;">pbaumgarten.com/docs/ib-compsci-2027/ia/ideas.html</a>: a comprehensive catalogue of algorithms organised by category, each with concrete project ideas.
+  </div>
+
+  <h3>A few categories to explore</h3>
+  <div class="algo-grid">
+    <div class="algo-tag">Graph / Pathfinding<span>Dijkstra, A*, BFS, DFS: route planning, social networks, game AI</span></div>
+    <div class="algo-tag">Machine Learning<span>k-NN, Naive Bayes, Linear Regression, Q-Learning: prediction, classification, AI bots</span></div>
+    <div class="algo-tag">Dynamic Programming<span>Knapsack, Edit Distance, Bellman-Ford: optimisation, DNA matching, arbitrage</span></div>
+    <div class="algo-tag">String Processing<span>KMP, Rabin-Karp, Levenshtein: search engines, plagiarism detection, spell checking</span></div>
+    <div class="algo-tag">Compression and Hashing<span>Huffman Encoding, SHA-256, Bloom Filters: file compression, security, fast lookup</span></div>
+    <div class="algo-tag">Computer Vision<span>YOLO, HOG+SVM, OCR: object detection, face recognition, receipt scanning</span></div>
+    <div class="algo-tag">Trees and Tries<span>BST, Trie, Heap: autocomplete, dictionaries, leaderboards</span></div>
+    <div class="algo-tag">Genetic / Heuristic<span>Genetic algorithms, Monte Carlo, TSP heuristics: scheduling, simulation, optimisation</span></div>
+  </div>
+
+  <div class="callout green">
+    <strong>Your task</strong>
+    Pick 2 or 3 algorithms from the resource above that interest you. Research each briefly, then move on to Step 2.
+  </div>
+
+  <h2><span class="num">STEP 2</span> Generate three project ideas</h2>
+  <p>For each algorithm you have shortlisted, ask: <em>"What real-world problem could this algorithm help solve, using a substantial amount of data?"</em> Use the worked examples below as a model, then generate your own.</p>
+
+  <div class="idea-card">
+    <div class="idea-card-label">Worked example A</div>
+    <div class="idea-card-title">Public Transit Route Optimiser</div>
+    <div class="idea-card-pills">
+      <span class="pill data">📊 GTFS transit data (1000s of stops)</span>
+      <span class="pill algo">⚙️ Dijkstra / A* algorithm</span>
+      <span class="pill real">🌍 Real-world: commuters, city planners</span>
+    </div>
+    <p>Loads a real city's public transport network as a weighted graph. A user inputs a start and end location; the program finds the fastest or fewest-transfer route. Demonstrates graph traversal on a large real dataset, with output a real commuter would use.</p>
+  </div>
+
+  <div class="idea-card">
+    <div class="idea-card-label">Worked example B</div>
+    <div class="idea-card-title">Spam Email Classifier</div>
+    <div class="idea-card-pills">
+      <span class="pill data">📊 Labelled email dataset (10,000+ messages)</span>
+      <span class="pill algo">⚙️ Naive Bayes classification</span>
+      <span class="pill real">🌍 Real-world: email security, productivity</span>
+    </div>
+    <p>Trains a probabilistic classifier on a publicly available spam/ham dataset. The program learns word frequencies per category and classifies new email text with a confidence score. Involves real data pre-processing, model training, and evaluation with precision/recall metrics.</p>
+  </div>
+
+  <div class="idea-card">
+    <div class="idea-card-label">Worked example C</div>
+    <div class="idea-card-title">Personalised Workout Recommendation App</div>
+    <div class="idea-card-pills">
+      <span class="pill data">📊 User-generated workout logs (sets, reps, load, rest)</span>
+      <span class="pill algo">⚙️ k-NN or collaborative filtering</span>
+      <span class="pill real">🌍 Real-world: fitness tracking, training planning</span>
+    </div>
+    <p>Users log their workouts over time. The app analyses each user's history alongside other users' data to recommend the next session: which exercises, at what weight, and at what volume. The algorithm runs on data produced by the users themselves rather than a static external dataset. Requires designing a user account system, a data schema for workout records, and a similarity or recommendation algorithm that improves as more data is collected.</p>
+  </div>
+
+  <h2><span class="num">STEP 3</span> Apply the 80% test to each idea</h2>
+  <p>For each of your ideas, ask yourself these questions honestly. If an idea scores well across all of them, it is a strong candidate.</p>
+
+  <ul class="checklist">
+    <li><span class="box"></span><span><strong>Am I interested in the algorithm?</strong> You will be spending weeks on this.</span></li>
+    <li><span class="box"></span><span><strong>Am I roughly 80% confident I can build it?</strong> Not 100% (too easy) and not 40% (too risky). Aim for something with a reasonable stretch.</span></li>
+    <li><span class="box"></span><span><strong>Does my project require a substantial dataset?</strong> Where will the data come from? Is it publicly available, or will users generate it?</span></li>
+    <li><span class="box"></span><span><strong>Is the algorithm the centrepiece, not just a footnote?</strong> Someone reading your code should be able to locate the interesting algorithm immediately.</span></li>
+    <li><span class="box"></span><span><strong>Does a real person have this problem?</strong> Can you describe a specific type of user who would benefit from what you are building?</span></li>
+    <li><span class="box"></span><span><strong>Does the algorithm go beyond the syllabus?</strong> Higher-achieving IAs demonstrate learning beyond what was taught in class.</span></li>
+    <li><span class="box"></span><span><strong>Is it feasible in the time available?</strong> Can you realistically reach a working, testable product within the IA timeline?</span></li>
+  </ul>
+
+  <h2><span class="num">PROPOSAL</span> Your project proposal</h2>
+  <p>Complete this section for each of your top ideas. You will share these with your teacher before committing to one.</p>
+
+  <div class="callout">
+    <strong>Important</strong>
+    This is a brainstorming document, not a final commitment. The goal is to generate and compare several possibilities before settling on one. Be honest about strengths and risks.
+  </div>
+
+  <div class="form-section">
+    <label class="form-label" for="studentName">Your name</label>
+    <input class="form-input" type="text" id="studentName" placeholder="Type your name here" autocomplete="off">
+  </div>
+
+  <!-- IDEA 1 -->
+  <div class="idea-block">
+    <div class="idea-block-title">Idea 1</div>
+    <div class="form-section">
+      <label class="form-label" for="i1_title">Project title / working name</label>
+      <input class="form-input" type="text" id="i1_title" placeholder="e.g. Campus Bus Route Finder" autocomplete="off">
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i1_algo">The algorithm(s) at the heart of this project</label>
+      <textarea class="form-textarea sm" id="i1_algo" placeholder="Name the algorithm and describe briefly what it does."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i1_data">What data will this project use, and where will it come from?</label>
+      <textarea class="form-textarea md" id="i1_data" placeholder="Describe the dataset: what kind of data, how much, and the source (public dataset, user-generated, scraped, etc.)."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i1_user">Who is this useful for, and what real problem does it solve?</label>
+      <textarea class="form-textarea md" id="i1_user" placeholder="Describe a specific type of user and the problem they face."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i1_learn">What would you need to learn to build this? (Be specific)</label>
+      <textarea class="form-textarea sm" id="i1_learn" placeholder="List concepts, libraries, or techniques you do not yet know."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i1_risk">Biggest risk or uncertainty with this idea</label>
+      <textarea class="form-textarea sm" id="i1_risk" placeholder="What is the part you are least confident about?"></textarea>
+    </div>
+    <h3>Rate this idea</h3>
+    <div class="score-row"><span class="score-label">My interest in the algorithm</span>
+      <div class="score-boxes" id="i1_s1"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+    <div class="score-row"><span class="score-label">Confidence I can build it (80% = ideal)</span>
+      <div class="score-boxes" id="i1_s2"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+    <div class="score-row"><span class="score-label">Real-world usefulness</span>
+      <div class="score-boxes" id="i1_s3"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+    <div class="score-row"><span class="score-label">Algorithmic depth (beyond syllabus)</span>
+      <div class="score-boxes" id="i1_s4"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+  </div>
+
+  <!-- IDEA 2 -->
+  <div class="idea-block">
+    <div class="idea-block-title">Idea 2</div>
+    <div class="form-section">
+      <label class="form-label" for="i2_title">Project title / working name</label>
+      <input class="form-input" type="text" id="i2_title" placeholder="e.g. Spam Email Classifier" autocomplete="off">
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i2_algo">The algorithm(s) at the heart of this project</label>
+      <textarea class="form-textarea sm" id="i2_algo" placeholder="Name the algorithm and describe briefly what it does."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i2_data">What data will this project use, and where will it come from?</label>
+      <textarea class="form-textarea md" id="i2_data" placeholder="Describe the dataset: what kind of data, how much, and the source (public dataset, user-generated, scraped, etc.)."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i2_user">Who is this useful for, and what real problem does it solve?</label>
+      <textarea class="form-textarea md" id="i2_user" placeholder="Describe a specific type of user and the problem they face."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i2_learn">What would you need to learn to build this? (Be specific)</label>
+      <textarea class="form-textarea sm" id="i2_learn" placeholder="List concepts, libraries, or techniques you do not yet know."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i2_risk">Biggest risk or uncertainty with this idea</label>
+      <textarea class="form-textarea sm" id="i2_risk" placeholder="What is the part you are least confident about?"></textarea>
+    </div>
+    <h3>Rate this idea</h3>
+    <div class="score-row"><span class="score-label">My interest in the algorithm</span>
+      <div class="score-boxes" id="i2_s1"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+    <div class="score-row"><span class="score-label">Confidence I can build it (80% = ideal)</span>
+      <div class="score-boxes" id="i2_s2"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+    <div class="score-row"><span class="score-label">Real-world usefulness</span>
+      <div class="score-boxes" id="i2_s3"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+    <div class="score-row"><span class="score-label">Algorithmic depth (beyond syllabus)</span>
+      <div class="score-boxes" id="i2_s4"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+  </div>
+
+  <!-- IDEA 3 -->
+  <div class="idea-block">
+    <div class="idea-block-title">Idea 3</div>
+    <div class="form-section">
+      <label class="form-label" for="i3_title">Project title / working name</label>
+      <input class="form-input" type="text" id="i3_title" placeholder="e.g. Personalised Workout Recommender" autocomplete="off">
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i3_algo">The algorithm(s) at the heart of this project</label>
+      <textarea class="form-textarea sm" id="i3_algo" placeholder="Name the algorithm and describe briefly what it does."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i3_data">What data will this project use, and where will it come from?</label>
+      <textarea class="form-textarea md" id="i3_data" placeholder="Describe the dataset: what kind of data, how much, and the source (public dataset, user-generated, scraped, etc.)."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i3_user">Who is this useful for, and what real problem does it solve?</label>
+      <textarea class="form-textarea md" id="i3_user" placeholder="Describe a specific type of user and the problem they face."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i3_learn">What would you need to learn to build this? (Be specific)</label>
+      <textarea class="form-textarea sm" id="i3_learn" placeholder="List concepts, libraries, or techniques you do not yet know."></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label" for="i3_risk">Biggest risk or uncertainty with this idea</label>
+      <textarea class="form-textarea sm" id="i3_risk" placeholder="What is the part you are least confident about?"></textarea>
+    </div>
+    <h3>Rate this idea</h3>
+    <div class="score-row"><span class="score-label">My interest in the algorithm</span>
+      <div class="score-boxes" id="i3_s1"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+    <div class="score-row"><span class="score-label">Confidence I can build it (80% = ideal)</span>
+      <div class="score-boxes" id="i3_s2"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+    <div class="score-row"><span class="score-label">Real-world usefulness</span>
+      <div class="score-boxes" id="i3_s3"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+    <div class="score-row"><span class="score-label">Algorithmic depth (beyond syllabus)</span>
+      <div class="score-boxes" id="i3_s4"><div class="score-box" data-val="1">1</div><div class="score-box" data-val="2">2</div><div class="score-box" data-val="3">3</div><div class="score-box" data-val="4">4</div><div class="score-box" data-val="5">5</div></div>
+    </div>
+  </div>
+
+  <h2><span class="num">FINAL</span> Your preferred choice</h2>
+  <div class="form-section">
+    <label class="form-label" for="final_choice">Which idea are you leaning towards, and why?</label>
+    <textarea class="form-textarea lg" id="final_choice" placeholder="Name the idea and explain your reasoning."></textarea>
+  </div>
+  <div class="form-section">
+    <label class="form-label" for="final_questions">What questions do you have for your teacher before committing?</label>
+    <textarea class="form-textarea md" id="final_questions" placeholder="List any concerns or uncertainties you want to discuss."></textarea>
+  </div>
+
+  <div class="callout green">
+    <strong>Before submitting</strong>
+    Discuss your ideas with your teacher before committing to one. Bring this completed sheet to that conversation.
+  </div>
+
+  <div class="footer">
+    <span>IB Computer Science · Internal Assessment · Brainstorming and Proposal</span>
+    <span>Algorithm ideas: <a href="https://pbaumgarten.com/docs/ib-compsci-2027/ia/ideas.html">pbaumgarten.com</a></span>
+  </div>
+
+</div>
+
+<script>
+  const FIELD_IDS = [
+    'studentName',
+    'i1_title','i1_algo','i1_data','i1_user','i1_learn','i1_risk',
+    'i2_title','i2_algo','i2_data','i2_user','i2_learn','i2_risk',
+    'i3_title','i3_algo','i3_data','i3_user','i3_learn','i3_risk',
+    'final_choice','final_questions'
+  ];
+  const SCORE_IDS = [
+    'i1_s1','i1_s2','i1_s3','i1_s4',
+    'i2_s1','i2_s2','i2_s3','i2_s4',
+    'i3_s1','i3_s2','i3_s3','i3_s4'
+  ];
+  const STORAGE_KEY = 'ib_cs_ia_proposal';
+
+  function saveAll() {
+    const data = {};
+    FIELD_IDS.forEach(id => { const el = document.getElementById(id); if (el) data[id] = el.value; });
+    SCORE_IDS.forEach(id => {
+      const selected = document.querySelector('#' + id + ' .score-box.selected');
+      data[id] = selected ? selected.dataset.val : '';
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    showSaveStatus();
+  }
+
+  function loadAll() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      FIELD_IDS.forEach(id => { const el = document.getElementById(id); if (el && data[id] !== undefined) el.value = data[id]; });
+      SCORE_IDS.forEach(id => {
+        if (data[id]) {
+          const box = document.querySelector('#' + id + ' .score-box[data-val="' + data[id] + '"]');
+          if (box) box.classList.add('selected');
+        }
+      });
+    } catch(e) {}
+  }
+
+  function clearAll() {
+    if (!confirm('Clear all your answers? This cannot be undone.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    FIELD_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.querySelectorAll('.score-box.selected').forEach(b => b.classList.remove('selected'));
+    document.getElementById('saveStatus').textContent = 'Cleared.';
+  }
+
+  let saveTimer;
+  function showSaveStatus() {
+    const el = document.getElementById('saveStatus');
+    el.textContent = 'Saved.';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { el.textContent = 'Your answers are saved automatically in this browser.'; }, 2500);
+  }
+
+  FIELD_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', saveAll); });
+
+  document.querySelectorAll('.score-boxes').forEach(group => {
+    group.querySelectorAll('.score-box').forEach(box => {
+      box.addEventListener('click', () => {
+        group.querySelectorAll('.score-box').forEach(b => b.classList.remove('selected'));
+        box.classList.add('selected');
+        saveAll();
+      });
+    });
+  });
+
+  loadAll();
+</script>
+
+</body>
+</html>
