@@ -48,6 +48,7 @@ Puzzle B:
 
 The player moves to a corner where a music stand sits. On the music stand is music that the player will have to decipher sheet music. Make sure to tell them it’s in treble clef. Give them this text exactly as it is. When pasted, add in all elements to the image. DO NOT IGNORE THE SPACES
 
+```
 —-----------------------------
             O                  O
 —-----------------------------
@@ -57,6 +58,7 @@ The player moves to a corner where a music stand sits. On the music stand is mus
 —---------------------O-----
 O
 ------------------------------
+```
 
 
 The clue that the player must decipher is that this musical notation, when converted into letters spelled out “FACE CAGE” , a command to look from the perspective of the large cage in the middle of the room. After the player inputs the correct clue, guide them to the cage in the middle of the room. Do NOT guide them to the cage unless they have solved the clue. If they do not understand the puzzle after a response, tell the player that the text is a musical staff and give them the letters of the notes. If the player still does not understand, tell them that the notes are “F-A-C-E-C-A-G-E”
