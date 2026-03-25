@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CSS Selector Practice</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f9f9f9;
+      padding: 2rem 1rem;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #222;
+      font-size: 2.5rem;
+    }
+    
+    .intro {
+      text-align: center;
+      color: #666;
+      margin-bottom: 3rem;
+      font-size: 1.1rem;
+    }
+    
+    .challenge {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .challenge h2 {
+      color: #222;
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+    }
+    
+    .description {
+      color: #666;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+    }
+    
+    .description a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+    
+    .description a:hover {
+      text-decoration: underline;
+    }
+    
+    .code-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .code-table th {
+      background: #f0f0f0;
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #ddd;
+    }
+    
+    .code-table td {
+      padding: 1rem;
+      vertical-align: top;
+      border-right: 1px solid #ddd;
+    }
+    
+    .code-table td:last-child {
+      border-right: none;
+    }
+    
+    .code-table tr:nth-child(even) {
+      background: #fafafa;
+    }
+    
+    pre {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    
+    .preview-label {
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .preview {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 2rem;
+      margin-bottom: 1rem;
+      min-height: 150px;
+    }
+    
+    .challenge-number {
+      display: inline-block;
+      background: #0066cc;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 32px;
+      margin-right: 0.5rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>CSS Selector Practice</h1>
+    <p class="intro">Complete these 5 challenges to practice tag, class, and ID selectors. Copy the HTML and CSS into your editor and fill in the blanks!</p>
+
+    <!-- Challenge 1 -->
+    <div class="challenge">
+      <h2><span class="challenge-number">1</span>Tag Selectors</h2>
+      <p class="description">Use tag selectors to style HTML elements. Make the h1 blue and the paragraph red.</p>
+      
+      <table class="code-table">
+        <tr>
+          <th>HTML (index.html)</th>
+          <th>CSS (style.css)</th>
+        </tr>
+        <tr>
+          <td>
+            <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;&lt;/title&gt;
+    &lt;link rel="stylesheet" href="style.css"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello World!&lt;/h1&gt;
+    &lt;p&gt;I am learning CSS!&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+          </td>
+          <td>
+            <pre>___ {
+  color: blue;
+}
+
+p {
+  color: ___;
+}</pre>
+          </td>
+        </tr>
+      </table>
+      
+      <div class="preview-label">Your result should look like this:</div>
+      <div class="preview">
+        <h1 style="color: blue; text-align: left; margin-bottom: 0.5rem;">Hello World!</h1>
+        <p style="color: red;">I am learning CSS!</p>
+      </div>
+    </div>
+
+    <!-- Challenge 2 -->
+    <div class="challenge">
+      <h2><span class="challenge-number">2</span>Class Selectors</h2>
+      <p class="description">Use class selectors to style specific elements. Give elements with a class a yellow background. Need help? <a href="https://www.w3schools.com/cssref/sel_class.php" target="_blank">Learn about classes</a>.</p>
+      
+      <table class="code-table">
+        <tr>
+          <th>HTML (index.html)</th>
+          <th>CSS (style.css)</th>
+        </tr>
+        <tr>
+          <td>
+            <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;&lt;/title&gt;
+    &lt;link rel="stylesheet" href="style.css"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello World!&lt;/h1&gt;
+    &lt;p class="highlight"&gt;This has a class!&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+          </td>
+          <td>
+            <pre>___ {
+  background-color: yellow;
+}</pre>
+          </td>
+        </tr>
+      </table>
+      
+      <div class="preview-label">Your result should look like this:</div>
+      <div class="preview">
+        <h1>Hello World!</h1>
+        <p style="background-color: yellow;">This has a class!</p>
+      </div>
+    </div>
+
+    <!-- Challenge 3 -->
+    <div class="challenge">
+      <h2><span class="challenge-number">3</span>ID Selectors</h2>
+      <p class="description">Use ID selectors to style a single element. Add a blue dotted border to the element with the ID. Need help? <a href="https://www.w3schools.com/cssref/pr_border.php" target="_blank">Learn about borders</a>.</p>
+      
+      <table class="code-table">
+        <tr>
+          <th>HTML (index.html)</th>
+          <th>CSS (style.css)</th>
+        </tr>
+        <tr>
+          <td>
+            <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;&lt;/title&gt;
+    &lt;link rel="stylesheet" href="style.css"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello World!&lt;/h1&gt;
+    &lt;p id="___"&gt;I have an ID!&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+          </td>
+          <td>
+            <pre>#special {
+  border: 2px dotted blue;
+}</pre>
+          </td>
+        </tr>
+      </table>
+      
+      <div class="preview-label">Your result should look like this:</div>
+      <div class="preview">
+        <h1>Hello World!</h1>
+        <p style="border: 2px dotted blue;">I have an ID!</p>
+      </div>
+    </div>
+
+    <!-- Challenge 4 -->
+    <div class="challenge">
+      <h2><span class="challenge-number">4</span>Mixed Selectors</h2>
+      <p class="description">Combine different selectors in one file. Style the h1 with a color, the paragraph with a class with a background color, and add a border to the h3. Need help with colors? <a href="https://www.w3schools.com/cssref/pr_text_color.php" target="_blank">Learn about color</a>.</p>
+      
+      <table class="code-table">
+        <tr>
+          <th>HTML (index.html)</th>
+          <th>CSS (style.css)</th>
+        </tr>
+        <tr>
+          <td>
+            <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;&lt;/title&gt;
+    &lt;link rel="stylesheet" href="style.css"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;My Page&lt;/h1&gt;
+    &lt;p class="intro"&gt;Welcome!&lt;/p&gt;
+    &lt;h3&gt;Section Title&lt;/h3&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+          </td>
+          <td>
+            <pre>h1 {
+  color: purple;
+}
+
+____ {
+  background-color: lightblue;
+}
+
+h3 {
+  border: ___;
+}</pre>
+          </td>
+        </tr>
+      </table>
+      
+      <div class="preview-label">Your result should look like this:</div>
+      <div class="preview">
+        <h1 style="color: purple; text-align: left; margin-bottom: 0.5rem;">My Page</h1>
+        <p style="background-color: lightblue;">Welcome!</p>
+        <h3 style="border: 3px solid green;">Section Title</h3>
+      </div>
+    </div>
+
+    <!-- Challenge 5 -->
+    <div class="challenge">
+      <h2><span class="challenge-number">5</span>Mixed Selectors (Variation)</h2>
+      <p class="description">Another challenge using tag, class, and ID selectors together. Style the heading, the special paragraph, and the main section. Need help with widths? <a href="https://www.w3schools.com/cssref/pr_dim_width.asp" target="_blank">Learn about width</a>.</p>
+      
+      <table class="code-table">
+        <tr>
+          <th>HTML (index.html)</th>
+          <th>CSS (style.css)</th>
+        </tr>
+        <tr>
+          <td>
+            <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;&lt;/title&gt;
+    &lt;link rel="stylesheet" href="style.css"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Blog Post&lt;/h1&gt;
+    &lt;p class="highlight"&gt;Important info here&lt;/p&gt;
+    &lt;div id="___"&gt;
+      &lt;p&gt;Regular paragraph&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+          </td>
+          <td>
+            <pre>h1 {
+  color: ___;
+}
+
+.highlight {
+  background-color: ___;
+}
+
+#____ {
+  border: 2px solid ___;
+}</pre>
+          </td>
+        </tr>
+      </table>
+      
+      <div class="preview-label">Your result should look like this:</div>
+      <div class="preview">
+        <h1 style="color: darkblue; text-align: left; margin-bottom: 0.5rem;">Blog Post</h1>
+        <p style="background-color: lightyellow;">Important info here</p>
+        <div style="border: 2px solid gray;">
+          <p>Regular paragraph</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
