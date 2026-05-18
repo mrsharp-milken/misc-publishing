@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Room Finder</title>
+    <style>
+      body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; margin: 24px; background: #f3f5f8; color: #1d2330; }
+      .container { max-width: 1180px; margin: 0 auto; }
+      .card { background: #fff; border: 1px solid #dce2ea; border-radius: 12px; padding: 18px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); }
+      h1, h2, h3 { margin-top: 0; }
+      .muted { color: #596173; font-size: 14px; }
+      .error { color: #b00020; font-weight: 600; }
+      .calendar-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+        margin: 0 -4px;
+        padding: 2px 4px 6px;
+      }
+      .calendar { width: 100%; border-collapse: separate; border-spacing: 8px; table-layout: fixed; }
+      .calendar th { text-align: left; color: #35405a; font-weight: 700; font-size: 14px; padding-bottom: 6px; }
+      .calendar td { vertical-align: top; min-width: 160px; }
+      .period-link { display: block; text-decoration: none; border: 1px solid #d3dcea; border-radius: 10px; padding: 10px; background: #f8fafd; color: #1d2330; transition: all 0.15s ease; }
+      .period-link:hover { border-color: #9db5ea; background: #eef4ff; }
+      .period-link.selected { border-color: #2457e0; background: #eaf0ff; box-shadow: inset 0 0 0 1px #2457e0; }
+      .period-id { display: block; font-weight: 700; margin-bottom: 2px; }
+      .period-time { display: block; font-size: 13px; color: #5e6880; }
+      .empty-cell { display: block; color: #9aa4b5; text-align: center; padding-top: 14px; }
+      .toggle-row { display: flex; flex-wrap: wrap; gap: 8px; }
+      .toggle-btn { text-decoration: none; color: #2f3b53; border: 1px solid #cfd8e5; background: #f8fafd; border-radius: 999px; padding: 7px 12px; font-weight: 600; font-size: 14px; }
+      .toggle-btn:hover { border-color: #9db5ea; background: #eef4ff; }
+      .toggle-btn.selected { color: #153fba; border-color: #2457e0; background: #eaf0ff; }
+      .text-link { color: #2457e0; text-decoration: none; font-weight: 600; }
+      .text-link:hover { text-decoration: underline; }
+      .unified-panel { padding-top: 14px; }
+      .results-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+      .filters-side { border-right: 1px solid #e5eaf1; padding-right: 16px; }
+      .rooms-side { min-width: 0; min-height: 420px; }
+      .control-stack { display: flex; flex-direction: column; gap: 14px; }
+      .control-item { min-width: 0; }
+      .control-label { display: block; font-size: 12px; font-weight: 700; color: #5b6478; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+      .control-value { display: inline-block; border: 1px solid #ccd5e1; border-radius: 999px; background: #f8fafd; padding: 7px 12px; font-weight: 700; }
+      .panel-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid #e5eaf1; }
+      .panel-top { margin-top: 0; padding-top: 0; border-top: 0; }
+      .meta-row { display: grid; grid-template-columns: 110px 130px 140px 120px 110px; gap: 10px; align-items: center; max-width: 100%; overflow-x: auto; }
+      .meta-item { display: block; min-width: 0; font-size: 14px; color: #2c3651; white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .meta-label { color: #5b6478; font-weight: 700; margin-right: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+      .floor-row { padding: 10px 0; border-top: 1px dashed #e5eaf1; }
+      .floor-row:first-child { border-top: 0; padding-top: 0; }
+      .floor-row h3 { margin-bottom: 8px; }
+      .room-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+      .room-chip { display: inline-block; border: 1px solid #ccd8eb; background: #f7faff; border-radius: 999px; padding: 5px 10px; font-weight: 600; font-size: 14px; color: #2c3651; }
+      .room-chip-wrap { position: relative; display: inline-block; }
+      .room-tooltip {
+        display: none;
+        position: absolute;
+        z-index: 25;
+        left: 0;
+        top: calc(100% + 8px);
+        min-width: 210px;
+        max-width: 260px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #d5deed;
+        background: #ffffff;
+        color: #26314a;
+        font-size: 12px;
+        line-height: 1.35;
+        box-shadow: 0 8px 20px rgba(20, 30, 50, 0.16);
+        pointer-events: none;
+      }
+      .room-tooltip span { display: block; white-space: nowrap; }
+      .room-chip-wrap:hover .room-tooltip { display: block; }
+      @media (max-width: 960px) {
+        .results-layout { grid-template-columns: 1fr; }
+        .filters-side { border-right: 0; border-bottom: 1px solid #e5eaf1; padding-right: 0; padding-bottom: 14px; }
+        .rooms-side { min-height: 0; }
+        .meta-row { grid-template-columns: repeat(2, minmax(120px, 1fr)); overflow-x: visible; }
+      }
+      @media (max-width: 640px) {
+        body { margin: 12px; }
+        .card { padding: 14px; }
+        .calendar-scroll {
+          margin: 0 -10px;
+          padding: 2px 10px 8px;
+        }
+        .calendar {
+          width: 200%;
+          border-spacing: 6px;
+        }
+        .calendar th,
+        .calendar td {
+          width: 20%;
+          min-width: 0;
+        }
+        .calendar th { font-size: 13px; }
+        .period-link { padding: 8px; border-radius: 8px; }
+        .period-id { font-size: 14px; }
+        .period-time { font-size: 12px; }
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="app"></div>
+    </div>
+    <script id="schedule-data" type="application/json">{"sections":[{"meetings":[{"room":"461","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"461","period_ids":["C1","C2","C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"461","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"461","period_ids":["D1","D2","D4","D5","E3"],"week":null,"sem":null}]},{"meetings":[{"room":"417","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"417","period_ids":["C1","C2","C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"460","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"460","period_ids":["C1","C2","C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"428","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"654","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"648","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"648","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"654","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"548","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"462","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"654","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"411","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"654","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"648","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"648","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"362","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"548","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"648","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"648","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"362","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"362","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"460","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"654","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"414","period_ids":["E1","E2","E3"],"week":null,"sem":null}]},{"meetings":[{"room":"414","period_ids":["D1","D2","D3"],"week":null,"sem":null}]},{"meetings":[{"room":"414","period_ids":["C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["A1","A2","A4"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["B1","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["B2"],"week":null,"sem":null},{"room":"422","period_ids":["G1","G2"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["D4","D5"],"week":null,"sem":null},{"room":"415","period_ids":["G4"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["F1","F2","F3"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["C4","C5","E3"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["D1","D2"],"week":null,"sem":1},{"room":"415","period_ids":["D3"],"week":null,"sem":null}]},{"meetings":[{"room":"414","period_ids":["B3"],"week":null,"sem":null},{"room":"51","period_ids":["D4","D5"],"week":null,"sem":2}]},{"meetings":[{"room":"443","period_ids":["C1","C2"],"week":null,"sem":1},{"room":"443","period_ids":["C3"],"week":null,"sem":null}]},{"meetings":[{"room":"552","period_ids":["B1","B2","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"550","period_ids":["G1","G2","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"555","period_ids":["B3","G1","G2","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"463","period_ids":["D1","D2"],"week":null,"sem":null},{"room":"555","period_ids":["B4","B5","G3"],"week":null,"sem":null}]},{"meetings":[{"room":"553","period_ids":["B3"],"week":null,"sem":null},{"room":"553","period_ids":["G3"],"week":null,"sem":null}]},{"meetings":[{"room":"553","period_ids":["B1","B2","B4","B5","C3"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["B3"],"week":null,"sem":null},{"room":"414","period_ids":["G3"],"week":null,"sem":null}]},{"meetings":[{"room":"356","period_ids":["B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"555","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":1}]},{"meetings":[{"room":"555","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":2}]},{"meetings":[{"room":"555","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":2}]},{"meetings":[{"room":"358","period_ids":["C1","C2"],"week":null,"sem":2}]},{"meetings":[{"room":"654","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":1}]},{"meetings":[{"room":"552","period_ids":["A1","A2","A3"],"week":null,"sem":1},{"room":"552","period_ids":["A5"],"week":"b","sem":1}]},{"meetings":[{"room":"552","period_ids":["D2"],"week":"a","sem":1},{"room":"552","period_ids":["D3","D4","D5"],"week":null,"sem":1}]},{"meetings":[{"room":"414","period_ids":["B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"414","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":2}]},{"meetings":[{"room":"414","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":1}]},{"meetings":[{"room":"555","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["C2","F4","F5"],"week":null,"sem":null},{"room":"415","period_ids":["C3"],"week":"a","sem":null}]},{"meetings":[{"room":"548","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"415","week":null,"sem":null,"special_session":{"kind":"per8","day":"Wednesday"}},{"room":"415","period_ids":["C3"],"week":"b","sem":null},{"room":"415","week":"a","sem":null,"special_session":{"kind":"per8","day":"Tuesday"}}]},{"meetings":[{"room":"552","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"553","period_ids":["G4"],"week":null,"sem":null},{"room":"553","week":null,"sem":null,"special_session":{"kind":"per8","day":"Thursday"}}]},{"meetings":[{"room":"553","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"550","period_ids":["A1","A2","A3"],"week":null,"sem":null},{"room":"550","period_ids":["G3"],"week":null,"sem":null}]},{"meetings":[{"room":"555","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"358","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"552","week":null,"sem":null,"special_session":{"kind":"per8","day":"Thursday"}},{"room":"552","week":null,"sem":null,"special_session":{"kind":"per8","day":"Wednesday"}}]},{"meetings":[{"room":"548","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"548","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["B3","G2"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["G1"],"week":null,"sem":null},{"room":"415","week":null,"sem":null,"special_session":{"kind":"per8","day":"Monday"}}]},{"meetings":[{"room":"552","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"552","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"553","period_ids":["A3","G2"],"week":null,"sem":null}]},{"meetings":[{"room":"553","period_ids":["G1"],"week":null,"sem":null},{"room":"553","week":null,"sem":null,"special_session":{"kind":"per8","day":"Monday"}}]},{"meetings":[{"room":"553","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["A5"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["B1"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null},{"room":"422","period_ids":["F3"],"week":null,"sem":null}]},{"meetings":[{"room":"462","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"426","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"462","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"426","period_ids":["C1","C2","C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"428","period_ids":["C1","C2","C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"428","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"411","period_ids":["C1","C2","C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"428","period_ids":["D1","D2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"428","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"545","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"545","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"545","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"411","period_ids":["E1","E2","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["E1","E2","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"545","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"548","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["G1","G2"],"week":null,"sem":null}]},{"meetings":[{"room":"545","period_ids":["D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["B2","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["A1","A2","A4"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["C1","C3"],"week":null,"sem":null}]},{"meetings":[{"room":"414","period_ids":["G1","G2"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["F1","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["B1","B3"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["E3","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["F2","F4"],"week":null,"sem":null}]},{"meetings":[{"room":"426","period_ids":["G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["D1","D2"],"week":null,"sem":null}]},{"meetings":[{"room":"360","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"356","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"360","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"358","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"360","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"462","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"553","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"358","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"358","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"360","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"462","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"462","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"358","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"358","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"360","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"360","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["C2","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"426","period_ids":["D4","D5","E3"],"week":null,"sem":null}]},{"meetings":[{"room":"426","period_ids":["F2","F4"],"week":null,"sem":null},{"room":"426","period_ids":["A4"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["B4","B5"],"week":null,"sem":null},{"room":"422","period_ids":["G4"],"week":null,"sem":null}]},{"meetings":[{"room":"426","period_ids":["D1","D2"],"week":null,"sem":null},{"room":"426","period_ids":["A5"],"week":null,"sem":null}]},{"meetings":[{"room":"426","period_ids":["A1","A2","E4"],"week":null,"sem":null}]},{"meetings":[{"room":"460","period_ids":["F1","F3","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"426","period_ids":["G1","G2","G3"],"week":null,"sem":null}]},{"meetings":[{"room":"428","period_ids":["D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"417","period_ids":["F1","F2","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"417","period_ids":["A1","A2","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"417","period_ids":["G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"417","period_ids":["G1","G2"],"week":null,"sem":null}]},{"meetings":[{"room":"356","period_ids":["E1","E2","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"358","period_ids":["C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"360","period_ids":["C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"417","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null},{"room":"417","period_ids":["F3"],"week":null,"sem":null}]},{"meetings":[{"room":"460","period_ids":["D3","D4","D5"],"week":null,"sem":null},{"room":"460","period_ids":["G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["F1","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["B3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"461","period_ids":["F1","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["F1","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["E1","E2","G3"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["E1","E2","G3"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["E1","E2","G3"],"week":null,"sem":null}]},{"meetings":[{"room":"414","period_ids":["D4","D5"],"week":null,"sem":null},{"room":"414","period_ids":["G5"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["E1","E2","G3"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["A1","A2","A4"],"week":null,"sem":null}]},{"meetings":[{"room":"461","period_ids":["A1","A2","A4"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["A1","A2","A4"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["A1","A2","A4"],"week":null,"sem":null}]},{"meetings":[{"room":"550","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"411","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"550","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"411","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"32","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"32","period_ids":["C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"428","period_ids":["E1","E2"],"week":null,"sem":null},{"room":"430","period_ids":["E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"466","period_ids":["B1","B2","E3"],"week":null,"sem":null}]},{"meetings":[{"room":"362","period_ids":["E1","E2","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"461","period_ids":["E1","E2","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"550","period_ids":["C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["B1","B2","E3"],"week":null,"sem":null}]},{"meetings":[{"room":"555","period_ids":["B1","B2"],"week":null,"sem":null},{"room":"546","period_ids":["E3"],"week":null,"sem":null}]},{"meetings":[{"room":"426","period_ids":["E1","E2"],"week":null,"sem":null},{"room":"414","period_ids":["E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"32","period_ids":["E1","E2","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"550","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"460","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["B1","B2","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["G4"],"week":null,"sem":null},{"room":"443","week":null,"sem":null,"special_session":{"kind":"per8","day":"Monday"}}]},{"meetings":[{"room":"430","period_ids":["G4"],"week":null,"sem":null},{"room":"430","week":null,"sem":null,"special_session":{"kind":"per8","day":"Monday"}}]},{"meetings":[{"room":"411","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"32","period_ids":["B1","B2"],"week":null,"sem":null},{"room":"32","period_ids":["B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["B1","B2","B3","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"550","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"545","period_ids":["D1","D2"],"week":null,"sem":null}]},{"meetings":[{"room":"362","period_ids":["C4","C5","D1","D2"],"week":null,"sem":null},{"room":"362","period_ids":["C1"],"week":null,"sem":null}]},{"meetings":[{"room":"362","period_ids":["D4","D5"],"week":null,"sem":null},{"room":"362","period_ids":["F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["D1","D2","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["D1","D2"],"week":null,"sem":null}]},{"meetings":[{"room":"460","period_ids":["D1","D2"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["D1","D2"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["D1","D2","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"411","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"417","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"32","period_ids":["D1","D2","D3","D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["F2"],"week":null,"sem":null}]},{"meetings":[{"room":"461","period_ids":["F2"],"week":null,"sem":null}]},{"meetings":[{"room":"411","period_ids":["E3"],"week":null,"sem":null}]},{"meetings":[{"room":"410","period_ids":["A5"],"week":null,"sem":null}]},{"meetings":[{"room":"415","period_ids":["A5"],"week":null,"sem":null}]},{"meetings":[{"room":"428","period_ids":["A5"],"week":null,"sem":null}]},{"meetings":[{"room":"553","period_ids":["A5"],"week":null,"sem":null}]},{"meetings":[{"room":"356","period_ids":["D3"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["D3"],"week":null,"sem":null}]},{"meetings":[{"room":"426","period_ids":["D3"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["D3"],"week":null,"sem":null}]},{"meetings":[{"room":"461","period_ids":["D3"],"week":null,"sem":null}]},{"meetings":[{"room":"518","period_ids":["D3"],"week":null,"sem":null}]},{"meetings":[{"room":"510","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"552","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"360","period_ids":["C1"],"week":null,"sem":null}]},{"meetings":[{"room":"515","period_ids":["C1"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["C1"],"week":null,"sem":null}]},{"meetings":[{"room":"362","period_ids":["C2"],"week":null,"sem":null}]},{"meetings":[{"room":"550","period_ids":["C2"],"week":null,"sem":null}]},{"meetings":[{"room":"553","period_ids":["C2"],"week":null,"sem":null}]},{"meetings":[{"room":"648","period_ids":["C2"],"week":null,"sem":null}]},{"meetings":[{"room":"654","period_ids":["C2"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["F2"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["A5"],"week":null,"sem":null}]},{"meetings":[{"room":"460","period_ids":["F2"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["G5"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["A5"],"week":null,"sem":null}]},{"meetings":[{"room":"461","period_ids":["A5"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["A5"],"week":null,"sem":null}]},{"meetings":[{"room":"410","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["G5"],"week":null,"sem":null}]},{"meetings":[{"room":"443","period_ids":["E3"],"week":null,"sem":null}]},{"meetings":[{"room":"463","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"422","period_ids":["D3"],"week":null,"sem":null}]},{"meetings":[{"room":"430","period_ids":["D3"],"week":null,"sem":null}]},{"meetings":[{"room":"469","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"511","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"514","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"515","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"518","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"546","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["C1"],"week":null,"sem":null}]},{"meetings":[{"room":"462","period_ids":["C1"],"week":null,"sem":null}]},{"meetings":[{"room":"469","period_ids":["C1"],"week":null,"sem":null}]},{"meetings":[{"room":"552","period_ids":["C1"],"week":null,"sem":null}]},{"meetings":[{"room":"553","period_ids":["C1"],"week":null,"sem":null}]},{"meetings":[{"room":"356","period_ids":["C2"],"week":null,"sem":null}]},{"meetings":[{"room":"413","period_ids":["C2"],"week":null,"sem":null}]},{"meetings":[{"room":"552","period_ids":["C2"],"week":null,"sem":null}]},{"meetings":[{"room":"004","period_ids":["A1","A2"],"week":null,"sem":2}]},{"meetings":[{"room":"004","period_ids":["A4","A5"],"week":null,"sem":1}]},{"meetings":[{"room":"004","period_ids":["D1","D2"],"week":null,"sem":2}]},{"meetings":[{"room":"104","period_ids":["A1","A2"],"week":null,"sem":1}]},{"meetings":[{"room":"104","period_ids":["A4","A5"],"week":null,"sem":2}]},{"meetings":[{"room":"104","period_ids":["D1","D2"],"week":null,"sem":1}]},{"meetings":[{"room":"32","period_ids":["A4","A5"],"week":null,"sem":1}]},{"meetings":[{"room":"39","period_ids":["A1","A2"],"week":null,"sem":1}]},{"meetings":[{"room":"004","period_ids":["E4","E5"],"week":null,"sem":1}]},{"meetings":[{"room":"004","period_ids":["E4","E5"],"week":null,"sem":2}]},{"meetings":[{"room":"004","period_ids":["D1","D2"],"week":null,"sem":1}]},{"meetings":[{"room":"104","period_ids":["A1","A2"],"week":null,"sem":2}]},{"meetings":[{"room":"104","period_ids":["G1","G2"],"week":null,"sem":1}]},{"meetings":[{"room":"104","period_ids":["A4","A5"],"week":null,"sem":1}]},{"meetings":[{"room":"004","period_ids":["B4","B5"],"week":null,"sem":2}]},{"meetings":[{"room":"004","period_ids":["B4","B5"],"week":null,"sem":1}]},{"meetings":[{"room":"004","period_ids":["F4","F5"],"week":null,"sem":2}]},{"meetings":[{"room":"104","period_ids":["D1","D2"],"week":null,"sem":2}]},{"meetings":[{"room":"104","period_ids":["D4","D5"],"week":null,"sem":1}]},{"meetings":[{"room":"104","period_ids":["C1","C2"],"week":null,"sem":2}]},{"meetings":[{"room":"39","period_ids":["F4","F5"],"week":null,"sem":1}]},{"meetings":[{"room":"104","period_ids":["F1","F2"],"week":null,"sem":null}]},{"meetings":[{"room":"104","period_ids":["F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["G1","G2","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["E1","E2","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["B1","B2","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["A1","A2"],"week":null,"sem":1},{"room":"Gym/Turf","period_ids":["A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["G1","G2"],"week":null,"sem":2},{"room":"Gym/Turf","period_ids":["G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["E1","E2"],"week":null,"sem":null},{"room":"Gym/Turf","period_ids":["A4","A5"],"week":null,"sem":2}]},{"meetings":[{"room":"Gym/Turf","period_ids":["B1","B2"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["F1","F2"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["G1","G2"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["B1","B2"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["C1","C2"],"week":null,"sem":1}]},{"meetings":[{"room":"Gym/Turf","period_ids":["C1","C2"],"week":null,"sem":2}]},{"meetings":[{"room":"Gym/Turf","period_ids":["C1","C2"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["C1","C2"],"week":null,"sem":1}]},{"meetings":[{"room":"Gym/Turf","period_ids":["C1","C2"],"week":null,"sem":2}]},{"meetings":[{"room":"Gym/Turf","period_ids":["A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["F1","F2"],"week":null,"sem":null}]},{"meetings":[{"room":"Gym/Turf","period_ids":["F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"466","period_ids":["E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"466","period_ids":["G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"466","period_ids":["C1","C2"],"week":null,"sem":null}]},{"meetings":[{"room":"466","period_ids":["A4","A5"],"week":null,"sem":2}]},{"meetings":[{"room":"466","period_ids":["A1","A2"],"week":null,"sem":2}]},{"meetings":[{"room":"466","period_ids":["A1","A2"],"week":null,"sem":1}]},{"meetings":[{"room":"466","period_ids":["F1","F2"],"week":"b","sem":null}]},{"meetings":[{"room":"466","period_ids":["F1","F2"],"week":"a","sem":null}]},{"meetings":[{"room":"466","period_ids":["G1","G2"],"week":"b","sem":null}]},{"meetings":[{"room":"463","period_ids":["F1","F2"],"week":"a","sem":null},{"room":"463","period_ids":["F5"],"week":null,"sem":null}]},{"meetings":[{"room":"463","period_ids":["F1","F2"],"week":"b","sem":null},{"room":"463","period_ids":["F4"],"week":null,"sem":null}]},{"meetings":[{"room":"463","period_ids":["G1","G2"],"week":"a","sem":null},{"room":"463","period_ids":["B2"],"week":null,"sem":null}]},{"meetings":[{"room":"410","period_ids":["F1","F2"],"week":"a","sem":null},{"room":"410","period_ids":["F4"],"week":null,"sem":null}]},{"meetings":[{"room":"410","period_ids":["F1","F2"],"week":"b","sem":null},{"room":"410","period_ids":["F5"],"week":null,"sem":null}]},{"meetings":[{"room":"410","period_ids":["G1","G2"],"week":"a","sem":null},{"room":"410","period_ids":["G4"],"week":null,"sem":null}]},{"meetings":[{"room":"466","period_ids":["G1","G2"],"week":"a","sem":null}]},{"meetings":[{"room":"466","period_ids":["E1","E2"],"week":"b","sem":null}]},{"meetings":[{"room":"466","period_ids":["E1","E2"],"week":"a","sem":null}]},{"meetings":[{"room":"463","period_ids":["G1","G2"],"week":"b","sem":null},{"room":"463","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"463","period_ids":["E1","E2"],"week":"a","sem":null},{"room":"463","period_ids":["B1"],"week":null,"sem":null}]},{"meetings":[{"room":"463","period_ids":["E1","E2"],"week":"b","sem":null},{"room":"463","period_ids":["E5"],"week":null,"sem":null}]},{"meetings":[{"room":"410","period_ids":["G1","G2"],"week":"b","sem":null},{"room":"410","period_ids":["G5"],"week":null,"sem":null}]},{"meetings":[{"room":"410","period_ids":["E1","E2"],"week":"a","sem":null},{"room":"410","period_ids":["B2"],"week":null,"sem":null}]},{"meetings":[{"room":"410","period_ids":["E1","E2"],"week":"b","sem":null},{"room":"410","period_ids":["E4"],"week":null,"sem":null}]},{"meetings":[{"room":"466","period_ids":["D1","D2"],"week":null,"sem":null}]},{"meetings":[{"room":"466","period_ids":["D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"514","period_ids":["B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"515","period_ids":["D1","D2"],"week":null,"sem":null}]},{"meetings":[{"room":"514","period_ids":["B1","B2"],"week":null,"sem":null}]},{"meetings":[{"room":"514","period_ids":["G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"356","period_ids":["B3"],"week":null,"sem":null}]},{"meetings":[{"room":"356","period_ids":["D1","D2","D4","D5"],"week":null,"sem":1}]},{"meetings":[{"room":"356","period_ids":["D1","D2","D4","D5"],"week":null,"sem":2}]},{"meetings":[{"room":"430","period_ids":["F3"],"week":null,"sem":null}]},{"meetings":[{"room":"356","period_ids":["A3"],"week":null,"sem":null}]},{"meetings":[{"room":"515","period_ids":["B1","B2","B4","B5"],"week":null,"sem":null}]},{"meetings":[{"room":"510","period_ids":["G1","G2","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"469","period_ids":["B1","B2"],"week":null,"sem":null}]},{"meetings":[{"room":"469","period_ids":["D1","D2","D4","D5"],"week":null,"sem":2}]},{"meetings":[{"room":"469","period_ids":["D1","D2","D4","D5"],"week":null,"sem":1}]},{"meetings":[{"room":"518","period_ids":["G1","G2","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"466","period_ids":["G3"],"week":null,"sem":null}]},{"meetings":[{"room":"518","period_ids":["D1"],"week":null,"sem":null},{"room":"518","period_ids":["D2"],"week":"b","sem":null}]},{"meetings":[{"room":"518","period_ids":["A4"],"week":null,"sem":null},{"room":"518","period_ids":["A5"],"week":"a","sem":null}]},{"meetings":[{"room":"511","period_ids":["A1","A2","A3"],"week":null,"sem":null}]},{"meetings":[{"room":"514","period_ids":["D1","D2","D3"],"week":null,"sem":null}]},{"meetings":[{"room":"511","period_ids":["D1","D2","D3"],"week":null,"sem":2}]},{"meetings":[{"room":"514","period_ids":["A3","A4","A5"],"week":null,"sem":2}]},{"meetings":[{"room":"511","period_ids":["D3","D4","D5"],"week":null,"sem":1}]},{"meetings":[{"room":"510","period_ids":["D1","D2"],"week":null,"sem":1},{"room":"515","period_ids":["D3"],"week":null,"sem":1}]},{"meetings":[{"room":"514","period_ids":["A3","A4","A5"],"week":null,"sem":1}]},{"meetings":[{"room":"515","period_ids":["D3","D4","D5"],"week":null,"sem":2}]},{"meetings":[{"room":"510","period_ids":["A4"],"week":null,"sem":null},{"room":"510","period_ids":["A5"],"week":"a","sem":null}]},{"meetings":[{"room":"510","period_ids":["D4"],"week":null,"sem":null},{"room":"510","period_ids":["D5"],"week":"a","sem":null}]},{"meetings":[{"room":"356","period_ids":["B1","B2","E3"],"week":null,"sem":null}]},{"meetings":[{"room":"469","period_ids":["C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"514","period_ids":["D4","D5"],"week":null,"sem":null}]},{"meetings":[{"room":"514","period_ids":["A1","A2"],"week":null,"sem":null}]},{"meetings":[{"room":"510","period_ids":["D1","D2"],"week":null,"sem":null}]},{"meetings":[{"room":"514","period_ids":["C4","C5","G1","G2"],"week":null,"sem":null}]},{"meetings":[{"room":"514","period_ids":["E1","E2","E3"],"week":null,"sem":null},{"room":"510","period_ids":["E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"511","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"518","period_ids":["A1","A2","A3"],"week":null,"sem":null},{"room":"518","period_ids":["G3"],"week":null,"sem":null}]},{"meetings":[{"room":"463","period_ids":["F3"],"week":null,"sem":null},{"room":"463","period_ids":["E3"],"week":null,"sem":null}]},{"meetings":[{"room":"356","period_ids":["A1","A2","A4","A5"],"week":null,"sem":null},{"room":"356","period_ids":["C5"],"week":null,"sem":null}]},{"meetings":[{"room":"469","period_ids":["E1","E2","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"469","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"518","period_ids":["E1","E2","E3"],"week":null,"sem":null},{"room":"514","period_ids":["E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"515","period_ids":["E1","E2","E3","E4","E5"],"week":null,"sem":null}]},{"meetings":[{"room":"515","period_ids":["A1","A2","A3","A4","A5"],"week":null,"sem":null}]},{"meetings":[{"room":"515","period_ids":["D4","D5","G3"],"week":null,"sem":null},{"room":"511","period_ids":["G4","G5"],"week":null,"sem":null},{"room":"510","period_ids":["D3"],"week":null,"sem":null}]},{"meetings":[{"room":"510","period_ids":["E3","E4","E5"],"week":null,"sem":null},{"room":"518","period_ids":["E1","E2"],"week":null,"sem":null},{"room":"510","period_ids":["F3"],"week":null,"sem":null}]},{"meetings":[{"room":"518","period_ids":["C1"],"week":null,"sem":null},{"room":"518","week":null,"sem":null,"special_session":{"kind":"per8","day":"Tuesday"}}]},{"meetings":[{"room":"514","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"511","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"514","period_ids":["C1"],"week":null,"sem":null},{"room":"514","week":null,"sem":null,"special_session":{"kind":"per8","day":"Tuesday"}}]},{"meetings":[{"room":"356","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"510","period_ids":["F1","F2","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"510","period_ids":["C1","C3","C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"469","period_ids":["G1","G2","G3","G4","G5"],"week":null,"sem":null}]},{"meetings":[{"room":"518","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]},{"meetings":[{"room":"548","period_ids":["C2","C4"],"week":null,"sem":null}]},{"meetings":[{"room":"511","period_ids":["C2","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"548","period_ids":["C3","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"552","period_ids":["C4","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"511","period_ids":["C1","C3"],"week":null,"sem":null}]},{"meetings":[{"room":"362","period_ids":["F2","F3"],"week":null,"sem":null}]},{"meetings":[{"room":"555","period_ids":["C1","C5"],"week":null,"sem":null}]},{"meetings":[{"room":"362","period_ids":["D3"],"week":null,"sem":null},{"room":"362","period_ids":["C3"],"week":null,"sem":null}]},{"meetings":[{"room":"356","period_ids":["C1","C3"],"week":null,"sem":null}]},{"meetings":[{"room":"545","period_ids":["C5"],"week":null,"sem":2}]},{"meetings":[{"room":"545","period_ids":["C4"],"week":null,"sem":2}]},{"meetings":[{"room":"545","period_ids":["C2"],"week":null,"sem":2}]},{"meetings":[{"room":"545","period_ids":["C3"],"week":null,"sem":2}]},{"meetings":[{"room":"545","period_ids":["C5"],"week":null,"sem":1}]},{"meetings":[{"room":"362","period_ids":["F1"],"week":null,"sem":1}]},{"meetings":[{"room":"545","period_ids":["C3"],"week":null,"sem":1}]},{"meetings":[{"room":"545","period_ids":["C1"],"week":null,"sem":1}]},{"meetings":[{"room":"545","period_ids":["C4"],"week":null,"sem":1}]},{"meetings":[{"room":"410","period_ids":["D5"],"week":null,"sem":1}]},{"meetings":[{"room":"362","period_ids":["F1"],"week":"b","sem":1}]},{"meetings":[{"room":"360","period_ids":["C2"],"week":"b","sem":1}]},{"meetings":[{"room":"515","period_ids":["G1","G2","G4","G5"],"week":null,"sem":null},{"room":"514","period_ids":["G3"],"week":null,"sem":null}]},{"meetings":[{"room":"515","period_ids":["F1","F2","F3","F4","F5"],"week":null,"sem":null}]}],"year":"2025-2026"}</script>
+    <script id="block-data" type="application/json">{"days":["Monday","Tuesday","Wednesday","Thursday","Friday"],"block_periods":{"A1":{"day":"Monday","time":"8:10-9:00"},"A2":{"day":"Monday","time":"9:05-9:55"},"A3":{"day":"Friday","time":"2:40-3:30"},"A4":{"day":"Wednesday","time":"10:15-11:05"},"A5":{"day":"Wednesday","time":"11:10-12:00"},"B1":{"day":"Monday","time":"10:15-11:05"},"B2":{"day":"Monday","time":"11:10-12:00"},"B3":{"day":"Wednesday","time":"12:50-1:35"},"B4":{"day":"Thursday","time":"8:10-9:00"},"B5":{"day":"Thursday","time":"9:05-9:55"},"C1":{"day":"Monday","time":"12:50-1:35"},"C2":{"day":"Monday","time":"1:40-2:35"},"C3":{"day":"Tuesday","time":"2:40-3:30"},"C4":{"day":"Thursday","time":"10:15-11:05"},"C5":{"day":"Thursday","time":"11:10-12:00"},"D1":{"day":"Tuesday","time":"8:10-9:00"},"D2":{"day":"Tuesday","time":"9:05-9:55"},"D3":{"day":"Monday","time":"2:40-3:30"},"D4":{"day":"Thursday","time":"12:50-1:35"},"D5":{"day":"Thursday","time":"1:40-2:35"},"E1":{"day":"Tuesday","time":"10:15-11:05"},"E2":{"day":"Tuesday","time":"11:10-12:00"},"E3":{"day":"Wednesday","time":"1:40-2:35"},"E4":{"day":"Friday","time":"8:10-9:00"},"E5":{"day":"Friday","time":"9:05-9:55"},"F1":{"day":"Tuesday","time":"12:50-1:35"},"F2":{"day":"Tuesday","time":"1:40-2:35"},"F3":{"day":"Wednesday","time":"2:40-3:30"},"F4":{"day":"Friday","time":"10:15-11:05"},"F5":{"day":"Friday","time":"11:10-12:00"},"G1":{"day":"Wednesday","time":"8:10-9:00"},"G2":{"day":"Wednesday","time":"9:05-9:55"},"G3":{"day":"Thursday","time":"2:40-3:30"},"G4":{"day":"Friday","time":"12:50-1:35"},"G5":{"day":"Friday","time":"1:40-2:35"}},"special_sessions":{"per8":{"Monday":{"time":"3:30-4:30"},"Tuesday":{"time":"3:30-4:30","label":"Conseils"},"Wednesday":{"time":"3:30-4:30","label":"Faculty Mtgs"},"Thursday":{"time":"3:30-4:30"},"Friday":{"time":"3:30-4:30"}}},"schedule":{"Monday":["A1","A2","B1","B2","C1","C2","D3"],"Tuesday":["D1","D2","E1","E2","F1","F2","C3"],"Wednesday":["G1","G2","A4","A5","B3","E3","F3"],"Thursday":["B4","B5","C4","C5","D4","D5","G3"],"Friday":["E4","E5","F4","F5","G4","G5","A3"]}}</script>
+    <script>
+(function () {
+  const scheduleData = JSON.parse(document.getElementById("schedule-data").textContent);
+  const blockData = JSON.parse(document.getElementById("block-data").textContent);
+
+  function parseTimeToMinutes(value) {
+    const parts = value.trim().split(":");
+    if (parts.length !== 2) throw new Error("Invalid time '" + value + "'.");
+    let hour = parseInt(parts[0], 10);
+    const minute = parseInt(parts[1], 10);
+    if (hour >= 1 && hour <= 6) hour += 12;
+    return hour * 60 + minute;
+  }
+
+  function parseTimeRange(value) {
+    const parts = value.split("-");
+    if (parts.length !== 2) throw new Error("Invalid time range '" + value + "'.");
+    const start = parseTimeToMinutes(parts[0]);
+    const end = parseTimeToMinutes(parts[1]);
+    if (end <= start) throw new Error("Invalid time range '" + value + "'.");
+    return [start, end];
+  }
+
+  function rangesOverlap(aStart, aEnd, bStart, bEnd) {
+    return aStart < bEnd && bStart < aEnd;
+  }
+
+  function qualifiersMatch(query, meetingValue) {
+    if (query === null || query === undefined || query === "") return true;
+    if (meetingValue === null || meetingValue === undefined) return true;
+    return query === meetingValue;
+  }
+
+  function buildSlots(data) {
+    const slots = {};
+    const blockPeriods = data.block_periods;
+    if (blockPeriods && typeof blockPeriods === "object") {
+      for (const [periodId, payload] of Object.entries(blockPeriods)) {
+        if (!payload || typeof payload !== "object") continue;
+        const day = payload.day;
+        const timeRange = payload.time;
+        if (typeof day !== "string" || typeof timeRange !== "string") continue;
+        const [startMin, endMin] = parseTimeRange(timeRange);
+        slots["period:" + periodId] = {
+          kind: "period",
+          idOrKind: periodId,
+          day,
+          startMin,
+          endMin,
+        };
+      }
+    }
+    const specialSessions = data.special_sessions;
+    if (specialSessions && typeof specialSessions === "object") {
+      for (const [kind, dayMap] of Object.entries(specialSessions)) {
+        if (!dayMap || typeof dayMap !== "object") continue;
+        for (const [day, payload] of Object.entries(dayMap)) {
+          if (!payload || typeof payload !== "object") continue;
+          const timeRange = payload.time;
+          if (typeof timeRange !== "string") continue;
+          const [startMin, endMin] = parseTimeRange(timeRange);
+          slots["special:" + kind + ":" + day] = {
+            kind: "special",
+            idOrKind: kind,
+            day,
+            startMin,
+            endMin,
+          };
+        }
+      }
+    }
+    return slots;
+  }
+
+  function collectAllRooms(data) {
+    const rooms = new Set();
+    const sections = data.sections;
+    if (!Array.isArray(sections)) return rooms;
+    for (const section of sections) {
+      if (!section || typeof section !== "object") continue;
+      const meetings = section.meetings;
+      if (!Array.isArray(meetings)) continue;
+      for (const meeting of meetings) {
+        if (!meeting || typeof meeting !== "object") continue;
+        const room = meeting.room;
+        if (typeof room === "string" && room.trim()) rooms.add(room.trim());
+      }
+    }
+    return rooms;
+  }
+
+  function meetingSlots(meeting, slotsByKey) {
+    const out = [];
+    const periodIds = meeting.period_ids;
+    if (Array.isArray(periodIds)) {
+      for (const periodId of periodIds) {
+        if (typeof periodId !== "string") continue;
+        const slot = slotsByKey["period:" + periodId];
+        if (slot) out.push(slot);
+      }
+    }
+    const special = meeting.special_session;
+    if (special && typeof special === "object") {
+      const kind = special.kind;
+      const day = special.day;
+      if (typeof kind === "string" && typeof day === "string") {
+        const slot = slotsByKey["special:" + kind + ":" + day];
+        if (slot) out.push(slot);
+      }
+    }
+    return out;
+  }
+
+  function findOccupiedRooms(data, slotsByKey, targetDay, targetStart, targetEnd, week, sem) {
+    const occupied = new Set();
+    const sections = data.sections;
+    if (!Array.isArray(sections)) return occupied;
+    for (const section of sections) {
+      if (!section || typeof section !== "object") continue;
+      const meetings = section.meetings;
+      if (!Array.isArray(meetings)) continue;
+      for (const meeting of meetings) {
+        if (!meeting || typeof meeting !== "object") continue;
+        const room = meeting.room;
+        if (typeof room !== "string" || !room.trim()) continue;
+        if (!qualifiersMatch(week, meeting.week)) continue;
+        if (!qualifiersMatch(sem, meeting.sem)) continue;
+        for (const slot of meetingSlots(meeting, slotsByKey)) {
+          if (slot.day !== targetDay) continue;
+          if (rangesOverlap(targetStart, targetEnd, slot.startMin, slot.endMin)) {
+            occupied.add(room.trim());
+            break;
+          }
+        }
+      }
+    }
+    return occupied;
+  }
+
+  function queryUnusedRooms(data, block, period, week, sem) {
+    const slotsByKey = buildSlots(block);
+    const slot = slotsByKey["period:" + period];
+    if (!slot) throw new Error("Unknown period '" + period + "'.");
+    const allRooms = collectAllRooms(data);
+    const occupied = findOccupiedRooms(
+      data,
+      slotsByKey,
+      slot.day,
+      slot.startMin,
+      slot.endMin,
+      week,
+      sem
+    );
+    const unused = [...allRooms].filter((room) => !occupied.has(room)).sort();
+    return {
+      totalRooms: allRooms.size,
+      occupiedCount: occupied.size,
+      unusedRooms: unused,
+    };
+  }
+
+  function groupRoomsByFloor(rooms) {
+    const byFloor = {};
+    const other = [];
+    for (const room of rooms) {
+      const roomNumber = parseInt(room, 10);
+      if (Number.isNaN(roomNumber)) {
+        other.push(room);
+        continue;
+      }
+      const floor = String(Math.floor((roomNumber / 100) % 10));
+      if (!byFloor[floor]) byFloor[floor] = [];
+      byFloor[floor].push(room);
+    }
+    const floorGroups = Object.keys(byFloor)
+      .sort((a, b) => parseInt(a, 10) - parseInt(b, 10))
+      .map((floor) => [floor, byFloor[floor].sort()]);
+    return [floorGroups, other.sort()];
+  }
+
+  function calendarView(data) {
+    const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const dayToPeriods = data.schedule;
+    const periodMeta = data.block_periods;
+    if (!dayToPeriods || typeof dayToPeriods !== "object" || !periodMeta) {
+      return { days: dayOrder, rows: [] };
+    }
+    let maxLen = 0;
+    for (const periods of Object.values(dayToPeriods)) {
+      if (Array.isArray(periods)) maxLen = Math.max(maxLen, periods.length);
+    }
+    const rows = [];
+    for (let rowIdx = 0; rowIdx < maxLen; rowIdx += 1) {
+      const row = [];
+      for (const day of dayOrder) {
+        const periods = dayToPeriods[day];
+        if (!Array.isArray(periods) || rowIdx >= periods.length) {
+          row.push(null);
+          continue;
+        }
+        const periodId = periods[rowIdx];
+        if (typeof periodId !== "string") {
+          row.push(null);
+          continue;
+        }
+        const meta = periodMeta[periodId] || {};
+        const timeText = typeof meta.time === "string" ? meta.time : "";
+        row.push({ period: periodId, time: timeText });
+      }
+      rows.push(row);
+    }
+    return { days: dayOrder, rows };
+  }
+
+  function scopeValues(selectedWeek, selectedSem) {
+    const weeks = selectedWeek !== null && selectedWeek !== undefined && selectedWeek !== ""
+      ? [selectedWeek]
+      : ["a", "b"];
+    const sems = selectedSem !== null && selectedSem !== undefined && selectedSem !== ""
+      ? [selectedSem]
+      : [1, 2];
+    return [weeks, sems];
+  }
+
+  function availabilityForScope(period, selectedWeek, selectedSem) {
+    const allRooms = [...collectAllRooms(scheduleData)].sort();
+    const [weeks, sems] = scopeValues(selectedWeek, selectedSem);
+    const availableSets = [];
+    const comboAvailability = {};
+
+    for (const week of ["a", "b"]) {
+      for (const sem of [1, 2]) {
+        const res = queryUnusedRooms(scheduleData, blockData, period, week, sem);
+        const roomSet = new Set(res.unusedRooms);
+        comboAvailability[week + ":" + sem] = roomSet;
+        if (weeks.includes(week) && sems.includes(sem)) {
+          availableSets.push(roomSet);
+        }
+      }
+    }
+
+    let availableRooms;
+    if (availableSets.length === 0) {
+      availableRooms = allRooms;
+    } else {
+      availableRooms = [...availableSets.reduce((acc, set) => {
+        for (const room of set) acc.add(room);
+        return acc;
+      }, new Set())].sort();
+    }
+
+    const details = {};
+    for (const room of availableRooms) {
+      const lines = ["Availability details:"];
+      const semToWeeks = { 1: [], 2: [] };
+      for (const sem of [1, 2]) {
+        for (const week of ["a", "b"]) {
+          if (comboAvailability[week + ":" + sem].has(room)) {
+            semToWeeks[sem].push(week);
+          }
+        }
+      }
+      const sem1 = semToWeeks[1];
+      const sem2 = semToWeeks[2];
+      if (
+        sem1.length === 2 &&
+        sem2.length === 2 &&
+        sem1.includes("a") &&
+        sem1.includes("b") &&
+        sem2.includes("a") &&
+        sem2.includes("b")
+      ) {
+        lines.push("All semesters: weeks A and B");
+      } else if (JSON.stringify(sem1) === JSON.stringify(sem2)) {
+        if (sem1.length === 0) {
+          lines.push("No availability by semester/week");
+        } else if (sem1.length === 1) {
+          lines.push("All semesters: week " + sem1[0].toUpperCase() + " only");
+        } else {
+          lines.push("All semesters: weeks A and B");
+        }
+      } else {
+        for (const sem of [1, 2]) {
+          const weeksForSem = semToWeeks[sem];
+          if (weeksForSem.length === 0) {
+            lines.push("Sem " + sem + ": none");
+          } else if (weeksForSem.length === 1) {
+            lines.push("Sem " + sem + ": week " + weeksForSem[0].toUpperCase() + " only");
+          } else {
+            lines.push("Sem " + sem + ": weeks A and B");
+          }
+        }
+      }
+      details[room] = lines.join("\n");
+    }
+    return [availableRooms, details];
+  }
+
+  function buildResult(period, weekValue, semValue) {
+    const query = queryUnusedRooms(scheduleData, blockData, period, weekValue, semValue);
+    const [scopedRooms, roomDetails] = availabilityForScope(period, weekValue, semValue);
+    const [floorGroups, otherRooms] = groupRoomsByFloor(scopedRooms);
+    return {
+      weekLabel: weekValue || "all",
+      semLabel: semValue !== null && semValue !== undefined && semValue !== "" ? String(semValue) : "all",
+      totalRooms: query.totalRooms,
+      occupiedCount: query.totalRooms - scopedRooms.length,
+      unusedCount: scopedRooms.length,
+      floorGroups,
+      otherRooms,
+      roomDetails,
+    };
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function buildQuery(params) {
+    const parts = [];
+    if (params.period) parts.push("period=" + encodeURIComponent(params.period));
+    if (params.week) parts.push("week=" + encodeURIComponent(params.week));
+    if (params.sem) parts.push("sem=" + encodeURIComponent(params.sem));
+    const query = parts.join("&");
+    return query ? "?" + query : "";
+  }
+
+  function renderCalendar(calendar, filters) {
+    const header = calendar.days.map((day) => "<th>" + escapeHtml(day) + "</th>").join("");
+    const body = calendar.rows
+      .map((row) => {
+        const cells = row
+          .map((cell) => {
+            if (!cell) return "<td><span class=\"empty-cell\">-</span></td>";
+            const selected = filters.period === cell.period ? " selected" : "";
+            const href =
+              buildQuery({
+                period: cell.period,
+                week: filters.week,
+                sem: filters.sem,
+              }) + "#results";
+            return (
+              "<td><a class=\"period-link" +
+              selected +
+              "\" data-preserve-scroll=\"true\" href=\"" +
+              href +
+              "\"><span class=\"period-id\">" +
+              escapeHtml(cell.period) +
+              "</span><span class=\"period-time\">" +
+              escapeHtml(cell.time) +
+              "</span></a></td>"
+            );
+          })
+          .join("");
+        return "<tr>" + cells + "</tr>";
+      })
+      .join("");
+    return (
+      '<div class="calendar-scroll" aria-label="Weekly schedule — scroll horizontally for more days">' +
+      '<table class="calendar"><thead><tr>' +
+      header +
+      "</tr></thead><tbody>" +
+      body +
+      "</tbody></table></div>"
+    );
+  }
+
+  function renderToggleRow(label, name, options, filters) {
+    const buttons = options
+      .map(([value, text]) => {
+        const selected = filters[name] === value ? " selected" : "";
+        const href = buildQuery({
+          period: filters.period,
+          week: name === "week" ? value : filters.week,
+          sem: name === "sem" ? value : filters.sem,
+        });
+        return (
+          '<a class="toggle-btn' +
+          selected +
+          '" data-preserve-scroll="true" href="' +
+          href +
+          '">' +
+          escapeHtml(text) +
+          "</a>"
+        );
+      })
+      .join("");
+    return (
+      '<div class="control-item">' +
+      '<span class="control-label">' +
+      escapeHtml(label) +
+      "</span>" +
+      '<div class="toggle-row">' +
+      buttons +
+      "</div></div>"
+    );
+  }
+
+  function renderRoomChips(rooms, roomDetails) {
+    return rooms
+      .map((room) => {
+        const lines = (roomDetails[room] || "").split("\n");
+        const tooltip = lines
+          .map((line) => "<span>" + escapeHtml(line) + "</span>")
+          .join("");
+        return (
+          '<span class="room-chip-wrap">' +
+          '<span class="room-chip">' +
+          escapeHtml(room) +
+          "</span>" +
+          '<span class="room-tooltip">' +
+          tooltip +
+          "</span></span>"
+        );
+      })
+      .join("");
+  }
+
+  function renderResults(filters, result, error) {
+    if (!filters.period) return "";
+
+    let errorHtml = error ? '<p class="error">' + escapeHtml(error) + "</p>" : "";
+    let roomsHtml = "";
+    if (result) {
+      const floorRows = [...result.floorGroups]
+        .reverse()
+        .map(
+          ([floor, rooms]) =>
+            '<div class="floor-row"><h3>Floor ' +
+            escapeHtml(floor) +
+            "</h3>" +
+            '<div class="room-chip-row">' +
+            renderRoomChips(rooms, result.roomDetails) +
+            "</div></div>"
+        )
+        .join("");
+
+      let otherHtml = "";
+      if (result.otherRooms.length > 0) {
+        otherHtml =
+          '<div class="floor-row"><h3>Other</h3>' +
+          '<div class="room-chip-row">' +
+          renderRoomChips(result.otherRooms, result.roomDetails) +
+          "</div></div>";
+      }
+
+      roomsHtml =
+        '<div class="panel-section panel-top">' +
+        "<h2>Available Rooms</h2>" +
+        '<div class="meta-row">' +
+        '<span class="meta-item"><span class="meta-label">Week</span> ' +
+        escapeHtml(result.weekLabel) +
+        "</span>" +
+        '<span class="meta-item"><span class="meta-label">Semester</span> ' +
+        escapeHtml(result.semLabel) +
+        "</span>" +
+        '<span class="meta-item"><span class="meta-label">Total rooms</span> ' +
+        escapeHtml(result.totalRooms) +
+        "</span>" +
+        '<span class="meta-item"><span class="meta-label">Occupied</span> ' +
+        escapeHtml(result.occupiedCount) +
+        "</span>" +
+        '<span class="meta-item"><span class="meta-label">Unused</span> ' +
+        escapeHtml(result.unusedCount) +
+        "</span>" +
+        "</div></div>" +
+        '<div class="panel-section">' +
+        floorRows +
+        otherHtml +
+        "</div>";
+    }
+
+    return (
+      '<div id="results" class="card unified-panel">' +
+      '<div class="results-layout">' +
+      '<aside class="filters-side">' +
+      "<h2>Filters</h2>" +
+      '<div class="control-stack">' +
+      '<div class="control-item period-pill">' +
+      '<span class="control-label">Period</span>' +
+      '<span class="control-value">' +
+      escapeHtml(filters.period) +
+      "</span></div>" +
+      renderToggleRow("Week", "week", [
+        ["", "All"],
+        ["a", "A"],
+        ["b", "B"],
+      ], filters) +
+      renderToggleRow("Semester", "sem", [
+        ["", "All"],
+        ["1", "1"],
+        ["2", "2"],
+      ], filters) +
+      '<div class="control-item"><a class="text-link" href="./">Reset</a></div>' +
+      "</div>" +
+      errorHtml +
+      "</aside>" +
+      '<section class="rooms-side">' +
+      roomsHtml +
+      "</section></div></div>"
+    );
+  }
+
+  function readFilters() {
+    const params = new URLSearchParams(window.location.search);
+    const period = (params.get("period") || "").trim();
+    const weekRaw = (params.get("week") || "").trim().toLowerCase();
+    const semRaw = (params.get("sem") || "").trim();
+    const week = weekRaw === "a" || weekRaw === "b" ? weekRaw : "";
+    const sem = semRaw === "1" || semRaw === "2" ? semRaw : "";
+    const weekValue = week || null;
+    const semValue = sem ? parseInt(sem, 10) : null;
+    return { period, week, sem, weekValue, semValue };
+  }
+
+  function renderApp() {
+    const filters = readFilters();
+    const calendar = calendarView(blockData);
+    let result = null;
+    let error = null;
+
+    if (filters.period) {
+      try {
+        result = buildResult(filters.period, filters.weekValue, filters.semValue);
+      } catch (exc) {
+        error = String(exc.message || exc);
+      }
+    }
+
+    const app = document.getElementById("app");
+    app.innerHTML =
+      "<h1>Room Finder</h1>" +
+      '<p class="muted">Click a period in the weekly grid, then narrow by week or semester.</p>' +
+      '<div class="card">' +
+      renderCalendar(calendar, filters) +
+      "</div>" +
+      renderResults(filters, result, error);
+
+    bindScrollPreservation();
+    restoreScrollPosition();
+  }
+
+  function bindScrollPreservation() {
+    const key = "roomFinderScrollY";
+    document.querySelectorAll("a[data-preserve-scroll='true']").forEach((link) => {
+      link.addEventListener("click", () => {
+        sessionStorage.setItem(key, String(window.scrollY));
+      });
+    });
+  }
+
+  function restoreScrollPosition() {
+    const key = "roomFinderScrollY";
+    const saved = sessionStorage.getItem(key);
+    if (saved !== null) {
+      sessionStorage.removeItem(key);
+      const y = Number(saved);
+      if (!Number.isNaN(y)) window.scrollTo(0, y);
+    }
+  }
+
+  renderApp();
+})();
+
+    </script>
+  </body>
+</html>
