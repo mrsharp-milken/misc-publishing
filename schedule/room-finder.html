@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Room Finder 25-26</title>
+    <title>Unscheduled Rooms 25-26</title>
     <style>
       body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; margin: 24px; background: #f3f5f8; color: #1d2330; }
       .container { max-width: 1180px; margin: 0 auto; }
@@ -560,7 +560,7 @@
 
       roomsHtml =
         '<div class="panel-section panel-top">' +
-        "<h2>Available Rooms</h2>" +
+        "<h2>Unscheduled Rooms</h2>" +
         '<div class="meta-row">' +
         '<span class="meta-item"><span class="meta-label">Week</span> ' +
         escapeHtml(result.weekLabel) +
@@ -643,7 +643,7 @@
 
     const app = document.getElementById("app");
     app.innerHTML =
-      "<h1>Room Finder 25-26</h1>" +
+      "<h1>Unscheduled Rooms 25-26</h1>" +
       '<p class="muted">Click a period in the weekly grid, then narrow by week or semester.</p>' +
       '<div class="card">' +
       renderCalendar(calendar, filters) +
