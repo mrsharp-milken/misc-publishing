@@ -68,8 +68,6 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
-            text-decoration: none;
-            color: inherit;
             display: flex;
             flex-direction: column;
             transition: box-shadow 0.15s ease, transform 0.15s ease;
@@ -81,6 +79,14 @@
             color: inherit;
         }
 
+        .card-main {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            color: inherit;
+            text-decoration: none;
+        }
+
         .card-thumb {
             background: #f0f0f2;
             display: flex;
@@ -88,6 +94,29 @@
             justify-content: center;
             padding: 1.5rem;
             min-height: 140px;
+        }
+
+        .card-thumb-label {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--text);
+        }
+
+        .card-thumb-sub {
+            margin-top: 0.45rem;
+            font-size: 0.78rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: var(--subtext);
+        }
+
+        .card-thumb-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -195,6 +224,28 @@
             color: var(--link);
             letter-spacing: 0.01em;
         }
+
+        .card-links {
+            list-style: none;
+            margin: 0;
+            padding: 0.75rem 1.25rem 1rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--subtext);
+        }
+
+        .card-links li + li {
+            margin-top: 0.4rem;
+        }
+
+        .card-links a {
+            color: var(--link);
+            text-decoration: none;
+        }
+
+        .card-links a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -206,35 +257,185 @@
 
     <div class="grid">
 
-        <a class="card" href="duck-debugger/index.html">
-            <div class="card-thumb duck-preview">
-                <div class="duck-panel duck-panel-bad">
-                    <img src="duck-debugger/ddb50_sleeping.png" alt="Sleeping duck">
-                    <div class="duck-bubble">
-                        <span class="sq sq-sm"></span>
+        <div class="card">
+            <a class="card-main" href="duck-debugger/index.html">
+                <div class="card-thumb duck-preview">
+                    <div class="duck-panel duck-panel-bad">
+                        <img src="duck-debugger/ddb50_sleeping.png" alt="Sleeping duck">
+                        <div class="duck-bubble">
+                            <span class="sq sq-sm"></span>
+                        </div>
+                    </div>
+                    <div class="duck-panel duck-panel-good">
+                        <img src="duck-debugger/ddb50.gif" alt="Duck debugger">
+                        <div class="duck-bubble">
+                            <span class="sq sq-lg"></span>
+                            <span class="sq sq-md"></span>
+                            <span class="sq sq-sm"></span>
+                        </div>
                     </div>
                 </div>
-                <div class="duck-panel duck-panel-good">
-                    <img src="duck-debugger/ddb50.gif" alt="Duck debugger">
-                    <div class="duck-bubble">
-                        <span class="sq sq-lg"></span>
-                        <span class="sq sq-md"></span>
-                        <span class="sq sq-sm"></span>
+                <div class="card-body">
+                    <div class="card-title">Getting the Most from the Duck Debugger</div>
+                    <div class="card-desc">
+                        A side-by-side comparison of two student conversations with CS50's AI duck debugger.
+                        One student gives incomplete responses and poor explanations, the other gives thoughtful
+                        explanations and shows their understanding.
                     </div>
+                    <span class="card-tag">View &rarr;</span>
+                </div>
+            </a>
+            <ul class="card-links">
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/duck-debugger/turtle-markdown.md">Turtle debugging transcript</a></li>
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/duck-debugger/duck-debugger-low-effort-convo.md">Low-effort conversation notes</a></li>
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/duck-debugger/duck-debugger-good-effort-convo.md">Good-effort conversation notes</a></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <a class="card-main" href="cs9/code-pictionary-handout.html">
+                <div class="card-thumb">
+                    <div class="card-thumb-stack">
+                        <div class="card-thumb-label">CS9</div>
+                        <div class="card-thumb-sub">Code Pictionary</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">Code Pictionary - Handout</div>
+                    <div class="card-desc">
+                        A collaborative drawing-and-coding activity handout for practicing shape functions and
+                        parameter-based thinking.
+                    </div>
+                    <span class="card-tag">View &rarr;</span>
+                </div>
+            </a>
+            <ul class="card-links">
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/cs9/code-pictionary-handout.md">Markdown instructions</a></li>
+                <li><a href="cs9/Function%20Stencils.pdf">Function stencils PDF</a></li>
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/cs9/Function%20Stencils%20Summary.md">Function stencils summary</a></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <a class="card-main" href="cs9/css-practice.html">
+                <div class="card-thumb">
+                    <div class="card-thumb-stack">
+                        <div class="card-thumb-label">CS9</div>
+                        <div class="card-thumb-sub">CSS Selector Practice</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">CSS Selector Practice</div>
+                    <div class="card-desc">
+                        A hands-on worksheet page for practicing CSS selector targeting, specificity, and styling
+                        patterns.
+                    </div>
+                    <span class="card-tag">View &rarr;</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="card">
+            <a class="card-main" href="https://github.com/mrsharp-milken/misc-publishing/blob/main/cs9/github-pages-how-to.md">
+                <div class="card-thumb">
+                    <div class="card-thumb-stack">
+                        <div class="card-thumb-label">CS9</div>
+                        <div class="card-thumb-sub">Publishing Guide</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">How to Host a Website on GitHub Pages</div>
+                    <div class="card-desc">
+                        A step-by-step markdown guide for getting student projects published and shareable online.
+                    </div>
+                    <span class="card-tag">Read &rarr;</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="card">
+            <a class="card-main" href="cs10/arcade_interaction_handout.html">
+                <div class="card-thumb">
+                    <div class="card-thumb-stack">
+                        <div class="card-thumb-label">CS10</div>
+                        <div class="card-thumb-sub">Arcade Interactions</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">Arcade Sprite Interaction Templates</div>
+                    <div class="card-desc">
+                        Student reference handout for sprite interactions in MakeCode Arcade, with reusable coding
+                        patterns and examples.
+                    </div>
+                    <span class="card-tag">View &rarr;</span>
+                </div>
+            </a>
+            <ul class="card-links">
+                <li><a href="cs10/arcade_interaction_handout-WIDE.html">Wide layout version</a></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <a class="card-main" href="ib11/class-or-object.html">
+                <div class="card-thumb">
+                    <div class="card-thumb-stack">
+                        <div class="card-thumb-label">IB11</div>
+                        <div class="card-thumb-sub">Class or Object?</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">Class or Object?</div>
+                    <div class="card-desc">
+                        An interactive activity for distinguishing classes from objects and discussing examples from
+                        real-world systems.
+                    </div>
+                    <span class="card-tag">View &rarr;</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="card">
+            <a class="card-main" href="ib11/ia_brainstorm_proposal.html">
+                <div class="card-thumb">
+                    <div class="card-thumb-stack">
+                        <div class="card-thumb-label">IB11</div>
+                        <div class="card-thumb-sub">IA Brainstorming</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">IB CS IA: Brainstorming and Proposal</div>
+                    <div class="card-desc">
+                        A structured worksheet for refining IA problem statements, user needs, and project proposals.
+                    </div>
+                    <span class="card-tag">View &rarr;</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-thumb">
+                <div class="card-thumb-stack">
+                    <div class="card-thumb-label">PROMPTS</div>
+                    <div class="card-thumb-sub">AI Activity Starters</div>
                 </div>
             </div>
             <div class="card-body">
-                <div class="card-title">Getting the Most from the Duck Debugger</div>
+                <div class="card-title">AI Prompt Collection</div>
                 <div class="card-desc">
-                    A side-by-side comparison of two student conversations with CS50's AI duck debugger. 
-                    One student gives incomplete responses and poor explanations, the other gives thoughtful 
-                    explanations and shows their understanding.
+                    Classroom prompt starters for game-master style activities, scenario-based writing, and puzzle
+                    design.
                 </div>
-                <span class="card-tag">View &rarr;</span>
             </div>
-        </a>
-
-        <!-- future cards go here -->
+            <ul class="card-links">
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/prompts/bakery-budget.md">Bakery budget</a></li>
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/prompts/escape-room-chair.md">Escape room chair</a></li>
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/prompts/music-theory.md">Music theory</a></li>
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/prompts/space-wormhole.md">Space wormhole</a></li>
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/prompts/spy-agency.md">Spy agency</a></li>
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/prompts/street-smarts.md">Street smarts</a></li>
+                <li><a href="https://github.com/mrsharp-milken/misc-publishing/blob/main/prompts/water-electricity.md">Water electricity</a></li>
+            </ul>
+        </div>
 
     </div>
 
